@@ -3,7 +3,6 @@ import torch as ch
 import torch.nn as nn
 import numpy as np
 import json
-import os
 import time
 from argparse import ArgumentParser
 from tools.datasets import ImageNet, ImageNet9
@@ -29,7 +28,7 @@ def main(args):
         map_to_in9.update(json.load(f))
 
     BASE_PATH_TO_EVAL = args.data_path
-    BATCH_SIZE = 32
+    BATCH_SIZE = 16
     WORKERS = 8
     
     # Load eval dataset
@@ -51,10 +50,10 @@ def main(args):
     else:
         model, _ = make_and_restore_model(arch=arch, dataset=train_ds,
                      resume_path=checkpoint)
+        
     model.cuda()
     model.eval()
     model = nn.DataParallel(model)
-
     # Evaluate model
     prec1 = eval_model(val_loader, model, map_to_in9, map_in_to_in9=(not in9_trained))
     print(f'Accuracy on {variation} is {prec1*100:.2f}%')
